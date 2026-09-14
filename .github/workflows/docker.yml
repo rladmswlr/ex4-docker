@@ -28,25 +28,25 @@ jobs:
           push: true
           tags: "rladmswlr/nginx:1.31.3-cd"
 
-      # # AWS 자격 증명 설정
-      # - name: AWS 자격 증명 설정
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ secrets.S3_REGION }}
+      # AWS 자격 증명 설정
+      - name: AWS 자격 증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.S3_REGION }}
 
-      # # GitHub → S3 → Private EC2
-      # - name: 컨테이너 배포 및 S3 파일 싱크
-      #   run: |
-      #     aws ssm send-command \
-      #       --instance-ids "i-022eea274191f4ee7" \
-      #       --document-name "AWS-RunShellScript" \
-      #       --parameters 'commands=[
-      #         "systemctl stop nginx || true",
-      #         "docker stop nginx-container || true",
-      #         "docker rm nginx-container || true",
-      #         "docker run -d --name nginx-container -p 80:80 nginx:1.31.3-alpine"
-      #       ]' \
-      #       --region "${{ secrets.S3_REGION }}" \
-      #       --comment "Deploying SSM docker"
+      # GitHub → S3 → Private EC2
+      - name: 컨테이너 배포 및 S3 파일 싱크
+        run: |
+          aws ssm send-command \
+            --instance-ids "i-022eea274191f4ee7" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+              "sudo docker pull rladmswlr/nginx:1.31.3-cd"
+              "sudo docker stop nginx-container || true",
+              "sudo docker rm nginx-container || true",
+              "sudo docker run -d --name nginx-container -p 80:80 nginx:1.31.3-alpine"
+            ]' \
+            --region "${{ secrets.S3_REGION }}" \
+            --comment "Deploying SSM docker"
